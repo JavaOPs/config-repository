@@ -1,0 +1,68 @@
+server:
+  port: 9092
+  shutdown: graceful
+  netty:
+    # время ожидания установки TCP соединения с сервером
+    connection-timeout: 3s
+    # время ожидания до закрытия TCP соединения, по которому не передаются данные
+    idle-timeout: 20s
+
+spring:
+  application:
+    name: orders-service
+  lifecycle:
+    timeout-per-shutdown-phase: 30s
+  r2dbc:
+    username: user
+    password: password
+    url: r2dbc:postgresql://localhost:15432/orders_service_db
+    pool:
+      # максимальное время ожидания получения соединения с базой
+      max-create-connection-time: 2s
+      # изначальный размер пула соединений
+      initial-size: 6
+      # максимальный размер пула соединений
+      max-size: 12
+  flyway:
+    user: ${spring.r2dbc.username}
+    password: ${spring.r2dbc.password}
+    url: jdbc:postgresql://localhost:15432/orders_service_db
+
+external:
+  # url для связи с Menu Service
+  menu-service-url: "http://localhost:9091"
+  # путь эндпоинта для получения информации о доступности и ценах блюд
+  menu-info-path: "/v1/menu-items/menu-info"
+  # таймаут, который будет использоваться при связи с Menu Service, чтобы не ожидать ответа вечно
+  default-timeout: 2s
+  # время ожидания перед тем, как совершить повторную попытку получить данные из Menu Service
+  retry-backoff: 100ms
+  # количество повторных попыток связи с Menu Service
+  retry-count: 5
+  # фактор неопределенности для того, чтобы минимизировать возможность сценария,
+  # при котором несколько инстансов Orders Service будут одновременно посылать ретраи в Menu Service.
+  retry-jitter: 0.75
+
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+
+api:
+  submit-order:
+    summary: Создание заказа пользователем.
+    description: |
+      Создает новый заказ на имя пользователя. 
+      Названия блюд передаются в теле запроса. 
+      В случае отсутствия какого-либо блюда в Menu Service, возвращается 500-ая ошибка.
+  get-orders:
+    summary: Получение списка заказов пользователя.
+    description: Возвращает список заказов пользователя, отсортированный по дате создания заказа.
+  response:
+    submitOk: Заказ успешно сформирован.
+    submitBadRequest: Заказ не был сформирован из-за ошибки в запросе. Подробнее в сообщении об ошибке.
+    submitNotFound: Заказ не был сформирован, так как часть блюд отсутствует в ресторане.
+    submitInternalError: Заказ не был сформирован из-за ошибки на сервере. Подробнее в сообщении об ошибке.
+    getOk: Список заказов пользователя сформирован.
+    getBadRequest: Не удалось сформировать список заказов пользователя из-за ошибки в параметрах запроса.

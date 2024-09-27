@@ -1,0 +1,11 @@
+spring:
+  datasource:
+    # Используем переменные окружения для указания логинов, паролей и урлов
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
+    url: ${DB_URL}
+  jpa:
+    properties:
+      hibernate:
+        # Выключаем показ sql запросов
+        show_sql: false

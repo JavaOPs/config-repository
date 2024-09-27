@@ -1,0 +1,103 @@
+server:
+  port: 9094
+  shutdown: graceful
+  netty:
+    connection-timeout: 3s
+    idle-timeout: 20s
+
+spring:
+  application:
+    name: menu-aggregate-service
+  lifecycle:
+    timeout-per-shutdown-phase: 30s
+
+external:
+  menu-service-url: "http://localhost:9091"
+  review-service-url: "http://localhost:9093"
+  menu-item-path: "/v1/menu-items"
+  menu-reviews-path: "/v1/reviews/menu-item"
+  menu-ratings-path: "/v1/reviews/ratings"
+  default-timeout: 2s
+  retry-backoff: 100ms
+  retry-count: 5
+  retry-jitter: 0.75
+
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        sliding-window-type: time_based
+        sliding-window-size: 30 # секунды
+        permitted-number-of-calls-in-half-open-state: 5
+        failure-rate-threshold: 60 # проценты
+        wait-duration-in-open-state:
+          seconds: 10
+        slow-call-duration-threshold:
+          seconds: 4s
+        # количество вызовов, по которым принимается решение открыть / закрыть circuitBreaker
+        # так как мы используем тип окна TIME_BASED, это количество вызовов должно произойти за
+        # указанное в параметре sliding-window-size время.
+        minimum-number-of-calls: 15
+    instances:
+      # Определяем CircuitBreaker, который будет использоваться в MenuClient
+      menuBackend:
+        base-config: default
+      # Определяем CircuitBreaker, который будет использоваться в ReviewsClient
+      reviewBackend:
+        base-config: default
+
+  retry:
+    configs:
+      default:
+        max-attempts: ${external.retry-count} # Максимальное количество попыток выполнения операции
+        wait-duration: # Продолжительность ожидания между попытками.
+          seconds: ${external.retry-backoff}
+        enable-exponential-backoff: true # Включаем экспоненциальное увеличения времени ожидания между попытками.
+        exponential-backoff-multiplier: 2 # Множитель экспоненциального увеличения времени ожидания.
+        enable-randomized-wait: true #  Включаем случайную задержку между попытками.
+        randomized-wait-factor: ${external.retry-jitter} # Это означает, что фактическое время ожидания будет варьироваться на retry-jitter% от исходного значения.
+        retry-exceptions: # Список исключений, при возникновении которых будут выполнены повторные попытки.
+          - ru.javaops.cloudjava.aggregateservice.exception.MenuAggregateException
+        ignore-exceptions:
+          - io.github.resilience4j.circuitbreaker.CallNotPermittedException
+    instances:
+      menuBackend:
+        base-config: default
+      reviewBackend:
+        base-config: default
+
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+
+api:
+  get-aggregate:
+    summary: Получение подробной информации о блюде по его идентификатору.
+    description: |
+      Предоставляет информацию о блюде, пользовательских отзывах к нему, а также рейтинге блюда.
+      В случае невозможности получить информацию о рейтинге и отзывах пользователя предоставляется
+      частичный ответ с указанием на ошибку загрузки данных. 
+      Список отзывов отсортирован и пагинирован согласно параметрам запроса. 
+      Варианты сортировки:
+      - date_asc - по дате создания от старых к новым
+      - date_desc - по дате создания от новых к старым
+  get-aggregate-list:
+    summary: Получение списка блюд и их рейтингов из конкретной категории.
+    description: |
+      Предоставляет список блюд, содержащий дополнительную информацию о каждом блюде:
+      - рейтинг
+      - средняя оценка
+      Список отсортирован согласно параметрам запроса.
+      Варианты сортировки: 
+      - az / za - по алфафиту
+      - date_asc / date_desc - по дате создания
+      - price_asc / price_desc - по цене
+      - rate_asc / rate_desc - по рейтингу
+  response:
+    getAggregateOk: Информация о блюде успешно сформирована.
+    getAggregateListOk: Список блюд успешно сформирован.
+    notFound: Блюдо по указанному идентификатору не найдено.
+    badRequest: Ответ не был сформирован из-за ошибки во входящих параметрах. Подробнее в сообщении об ошибке.
+    serviceUnavailable: Ответ не был сформирован из-за недоступности одной из внешних систем. Подробнее в сообщении об ошибке.

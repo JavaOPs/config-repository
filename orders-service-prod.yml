@@ -1,0 +1,21 @@
+spring:
+  # Используем переменные окружения для указания логинов, паролей и урлов
+  r2dbc:
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
+    url: ${DB_URL}
+  flyway:
+    user: ${spring.r2dbc.username}
+    password: ${spring.r2dbc.password}
+    url: ${FLYWAY_DB_URL}
+
+external:
+  menu-service-url: ${MENU_SERVICE_URL}
+  # Увеличиваем таймаут, который будет использоваться при связи с Menu Service
+  default-timeout: 5s
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: refresh
