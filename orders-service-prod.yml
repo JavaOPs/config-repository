@@ -8,6 +8,11 @@ spring:
     user: ${spring.r2dbc.username}
     password: ${spring.r2dbc.password}
     url: ${FLYWAY_DB_URL}
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
+    consumer:
+      properties:
+        schema.registry.url: ${SCHEMA_REGISTRY_URL}
 
 external:
   menu-service-url: ${MENU_SERVICE_URL}
