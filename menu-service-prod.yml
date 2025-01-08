@@ -9,3 +9,6 @@ spring:
       hibernate:
         # Выключаем показ sql запросов
         show_sql: false
+
+external:
+  discovery-service-url: ${DISCOVERY_SERVICE_URL}

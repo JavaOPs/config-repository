@@ -11,9 +11,21 @@ spring:
   lifecycle:
     timeout-per-shutdown-phase: 30s
 
+eureka:
+  client:
+    service-url:
+      defaultZone: ${external.discovery-service-url}
+    registry-fetch-interval-seconds: 5
+    initial-instance-info-replication-interval-seconds: 5
+  instance:
+    lease-renewal-interval-in-seconds: 5
+    lease-expiration-duration-in-seconds: 5
+    prefer-ip-address: true
+
 external:
-  menu-service-url: "http://localhost:9091"
-  review-service-url: "http://localhost:9093"
+  discovery-service-url: http://localhost:8761/eureka/
+  menu-service-url: "http://menu-service"
+  review-service-url: "http://review-service"
   menu-item-path: "/v1/menu-items"
   menu-reviews-path: "/v1/reviews/menu-item"
   menu-ratings-path: "/v1/reviews/ratings"
