@@ -18,6 +18,7 @@ external:
   discovery-service-url: ${DISCOVERY_SERVICE_URL}
   # Увеличиваем таймаут, который будет использоваться при связи с Menu Service
   default-timeout: 5s
+  zipkin-endpoint: ${ZIPKIN_URL}
 
 management:
   endpoints:
