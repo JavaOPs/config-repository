@@ -2,3 +2,5 @@ external:
   discovery-service-url: ${DISCOVERY_SERVICE_URL}
   redis-host: ${REDIS_HOST}
   zipkin-endpoint: ${ZIPKIN_URL}
+  keycloak-url: ${KEYCLOAK_URL}
+  keycloak-client-secret: ${KEYCLOAK_CLIENT_SECRET}

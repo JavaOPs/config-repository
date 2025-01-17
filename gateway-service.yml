@@ -4,6 +4,10 @@ server:
   netty:
     connection-timeout: 3s
     idle-timeout: 20s
+  reactive:
+    session:
+      cookie:
+        name: CLOUD_JAVA_SESSION
 
 spring:
   application:
@@ -33,6 +37,8 @@ spring:
               replenishRate: 10
               burstCapacity: 20
               requestedTokens: 1
+        - TokenRelay
+        - SaveSession
       routes:
         - id: menu-service-route
           uri: lb://menu-service
@@ -72,6 +78,22 @@ spring:
       host: ${external.redis-host}
       port: ${external.redis-port}
       timeout: 3s
+
+  session:
+    timeout: 10m
+    redis:
+      namespace: cloudjava:gateway
+  security:
+    oauth2:
+      client:
+        registration:
+          keycloak:
+            client-id: cloud-java-gateway
+            client-secret: ${external.keycloak-client-secret}
+            scope: openid,roles
+        provider:
+          keycloak:
+            issuer-uri: ${external.keycloak-url}
 
 resilience4j:
   circuitbreaker:
@@ -114,6 +136,8 @@ external:
   redis-host: localhost
   redis-port: 6379
   zipkin-endpoint: http://localhost:9411/api/v2/spans
+  keycloak-url: http://keycloak:8080/realms/cloud-java
+  keycloak-client-secret: 5eVPs8Am7if8P6KMUi4nSFpZJhIh1uE1
 
 management:
   endpoints:
