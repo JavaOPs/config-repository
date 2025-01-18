@@ -53,6 +53,12 @@ spring:
         format_sql: true
         # говорим hibernate показывать sql запросы в логах (для отладки и тестирования)
         show_sql: true
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${external.keycloak-url}
+          jwk-set-uri: ${external.jwk-set-url}
 
 eureka:
   client:
@@ -67,6 +73,8 @@ eureka:
 external:
   discovery-service-url: http://localhost:8761/eureka/
   zipkin-endpoint: http://localhost:9411/api/v2/spans
+  keycloak-url: http://keycloak:8080/realms/cloud-java
+  jwk-set-url: http://keycloak:8080/realms/cloud-java/protocol/openid-connect/certs
 
 management:
   endpoints:
