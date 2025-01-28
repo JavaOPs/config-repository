@@ -33,6 +33,22 @@ external:
   retry-backoff: 100ms
   retry-count: 5
   retry-jitter: 0.75
+  zipkin-endpoint: http://localhost:9411/api/v2/spans
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  tracing:
+    enabled: true
+    sampling:
+      probability: 1.0
+    propagation:
+      type: b3
+  zipkin:
+    tracing:
+      endpoint: ${external.zipkin-endpoint}
 
 resilience4j:
   circuitbreaker:
