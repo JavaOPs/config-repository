@@ -19,3 +19,4 @@ external:
   # Увеличиваем таймаут, который будет использоваться при связи с Menu Service
   default-timeout: 5s
   zipkin-endpoint: ${ZIPKIN_URL}
+  loki-url: ${LOKI_URL}

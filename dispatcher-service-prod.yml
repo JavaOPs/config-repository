@@ -7,3 +7,6 @@ spring:
     producer:
       properties:
         schema.registry.url: ${SCHEMA_REGISTRY_URL}
+
+external:
+  loki-url: ${LOKI_URL}

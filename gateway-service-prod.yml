@@ -4,3 +4,4 @@ external:
   zipkin-endpoint: ${ZIPKIN_URL}
   keycloak-url: ${KEYCLOAK_URL}
   jwk-set-url: ${JWK_SET_URL}
+  loki-url: ${LOKI_URL}

@@ -72,6 +72,7 @@ external:
   # при котором несколько инстансов Orders Service будут одновременно посылать ретраи в Menu Service.
   retry-jitter: 0.75
   zipkin-endpoint: http://localhost:9411/api/v2/spans
+  loki-url: http://localhost:3100/loki/api/v1/push
 
 management:
   endpoints:
@@ -87,6 +88,12 @@ management:
   zipkin:
     tracing:
       endpoint: ${external.zipkin-endpoint}
+  metrics:
+    tags:
+      application: ${spring.application.name}
+    distribution:
+      percentiles-histogram:
+        all: true
 
 springdoc:
   api-docs:
