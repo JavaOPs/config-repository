@@ -1,0 +1,21 @@
+server:
+  port: 8761
+  shutdown: graceful
+  netty:
+    connection-timeout: 2s
+    idle-timeout: 20s
+
+spring:
+  application:
+    name: discovery-service
+  lifecycle:
+    timeout-per-shutdown-phase: 30s
+
+eureka:
+  instance:
+    hostname: localhost
+  client:
+    register-with-eureka: false
+    fetch-registry: false
+    service-url:
+      defaultZone: http://${eureka.instance.hostname}:${server.port}/eureka
