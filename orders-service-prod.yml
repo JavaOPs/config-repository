@@ -15,6 +15,6 @@ spring:
         schema.registry.url: ${SCHEMA_REGISTRY_URL}
 
 external:
-  menu-service-url: ${MENU_SERVICE_URL}
+  discovery-service-url: ${DISCOVERY_SERVICE_URL}
   # Увеличиваем таймаут, который будет использоваться при связи с Menu Service
   default-timeout: 5s

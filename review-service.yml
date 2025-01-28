@@ -54,6 +54,19 @@ spring:
         # говорим hibernate показывать sql запросы в логах (для отладки и тестирования)
         show_sql: true
 
+eureka:
+  client:
+    service-url:
+      defaultZone: ${external.discovery-service-url}
+    initial-instance-info-replication-interval-seconds: 5
+  instance:
+    lease-renewal-interval-in-seconds: 5
+    lease-expiration-duration-in-seconds: 5
+    prefer-ip-address: true
+
+external:
+  discovery-service-url: http://localhost:8761/eureka/
+
 springdoc:
   api-docs:
     path: /api-docs

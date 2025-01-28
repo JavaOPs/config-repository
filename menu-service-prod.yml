@@ -6,3 +6,6 @@ spring:
     url: ${DB_URL}
   jpa:
     show_sql: false # Выключаем показ sql запросов
+
+external:
+  discovery-service-url: ${DISCOVERY_SERVICE_URL}

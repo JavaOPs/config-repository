@@ -1,6 +1,5 @@
 external:
   # Используем переменные окружения для указания логинов, паролей и урлов
-  menu-service-url: ${MENU_SERVICE_URL}
-  review-service-url: ${REVIEW_SERVICE_URL}
+  discovery-service-url: ${DISCOVERY_SERVICE_URL}
   # Увеличиваем таймаут
   default-timeout: 5s
