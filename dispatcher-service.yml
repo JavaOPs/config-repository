@@ -1,0 +1,42 @@
+server:
+  port: 9096
+  shutdown: graceful
+  tomcat:
+    connection-timeout: 3s
+    keep-alive-timeout: 20s
+    threads:
+      max: 200
+      min-spare: 10
+
+spring:
+  application:
+    name: dispatcher-service
+  lifecycle:
+    timeout-per-shutdown-phase: 30s
+  kafka:
+    bootstrap-servers: localhost:9097
+    consumer:
+      group-id: ${spring.application.name}
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: io.confluent.kafka.serializers.KafkaAvroDeserializer
+      properties:
+        specific.avro.reader: true
+        schema.registry.url: http://localhost:8081
+      auto-offset-reset: earliest
+      enable-auto-commit: false
+    listener:
+      ack-mode: manual
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: io.confluent.kafka.serializers.KafkaAvroSerializer
+      properties:
+        schema.registry.url: http://localhost:8081
+        enable.idempotence: true
+        acks: all
+
+kafkaprops:
+  order-dispatch-topic: v1.orders_dispatch
+  order-placed-topic: v1.public.orders_outbox
+  replication-factor: 1
+  partitions-count: 3
+  nack-sleep-duration: 100ms
