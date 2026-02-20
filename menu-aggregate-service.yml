@@ -38,18 +38,20 @@ external:
 
 management:
   endpoints:
+    access:
+      default: unrestricted
     web:
       exposure:
         include: "*"
   tracing:
-    enabled: true
+    export:
+      enabled: true
+      zipkin:
+        endpoint: ${external.zipkin-endpoint}
     sampling:
       probability: 1.0
     propagation:
       type: b3
-  zipkin:
-    tracing:
-      endpoint: ${external.zipkin-endpoint}
   metrics:
     tags:
       application: ${spring.application.name}

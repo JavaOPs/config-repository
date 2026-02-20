@@ -4,6 +4,7 @@ server:
   netty:
     connection-timeout: 3s
     idle-timeout: 20s
+  forward-headers-strategy: none
 
 spring:
   application:
@@ -12,60 +13,62 @@ spring:
     timeout-per-shutdown-phase: 30s
   cloud:
     gateway:
-      httpclient:
-        connect-timeout: 3000
-        response-timeout: 5s
-      default-filters:
-        - name: Retry
-          args:
-            retries: 5
-            methods: GET
-            series: SERVER_ERROR
-            exceptions: java.io.IOException, java.util.concurrent.TimeoutException
-            backoff:
-              firstBackoff: 300ms
-              maxBackoff: 3000ms
-              factor: 2
-              basedOnPreviousValue: false
-        - name: RequestRateLimiter
-          args:
-            redis-rate-limiter:
-              replenishRate: 10
-              burstCapacity: 20
-              requestedTokens: 1
-      routes:
-        - id: menu-service-route
-          uri: lb://menu-service
-          predicates:
-            - Path=/v1/menu-items/**
-          filters:
-            - name: CircuitBreaker
+      server:
+        webflux:
+          httpclient:
+            connect-timeout: 3000
+            response-timeout: 5s
+          default-filters:
+            - name: Retry
               args:
-                name: menuServiceCircuitBreaker
-        - id: orders-service-route
-          uri: lb://orders-service
-          predicates:
-            - Path=/v1/menu-orders/**
-          filters:
-            - name: CircuitBreaker
+                retries: 5
+                methods: GET
+                series: SERVER_ERROR
+                exceptions: java.io.IOException, java.util.concurrent.TimeoutException
+                backoff:
+                  firstBackoff: 300ms
+                  maxBackoff: 3000ms
+                  factor: 2
+                  basedOnPreviousValue: false
+            - name: RequestRateLimiter
               args:
-                name: ordersServiceCircuitBreaker
-        - id: review-service-route
-          uri: lb://review-service
-          predicates:
-            - Path=/v1/reviews/**
-          filters:
-            - name: CircuitBreaker
-              args:
-                name: reviewServiceCircuitBreaker
-        - id: menu-aggregate-service-route
-          uri: lb://menu-aggregate-service
-          predicates:
-            - Path=/v1/menu-aggregate/**
-          filters:
-            - name: CircuitBreaker
-              args:
-                name: menuAggregateServiceCircuitBreaker
+                redis-rate-limiter:
+                  replenishRate: 10
+                  burstCapacity: 20
+                  requestedTokens: 1
+          routes:
+            - id: menu-service-route
+              uri: lb://menu-service
+              predicates:
+                - Path=/v1/menu-items/**
+              filters:
+                - name: CircuitBreaker
+                  args:
+                    name: menuServiceCircuitBreaker
+            - id: orders-service-route
+              uri: lb://orders-service
+              predicates:
+                - Path=/v1/menu-orders/**
+              filters:
+                - name: CircuitBreaker
+                  args:
+                    name: ordersServiceCircuitBreaker
+            - id: review-service-route
+              uri: lb://review-service
+              predicates:
+                - Path=/v1/reviews/**
+              filters:
+                - name: CircuitBreaker
+                  args:
+                    name: reviewServiceCircuitBreaker
+            - id: menu-aggregate-service-route
+              uri: lb://menu-aggregate-service
+              predicates:
+                - Path=/v1/menu-aggregate/**
+              filters:
+                - name: CircuitBreaker
+                  args:
+                    name: menuAggregateServiceCircuitBreaker
   data:
     redis:
       connect-timeout: 3s
@@ -126,21 +129,23 @@ external:
 
 management:
   endpoints:
+    access:
+      default: unrestricted
     web:
       exposure:
         include: "*"
   endpoint:
     gateway:
-      enabled: true
+      access: unrestricted
   tracing:
-    enabled: true
+    export:
+      enabled: true
+      zipkin:
+        endpoint: ${external.zipkin-endpoint}
     sampling:
       probability: 1.0
     propagation:
       type: b3
-  zipkin:
-    tracing:
-      endpoint: ${external.zipkin-endpoint}
   metrics:
     tags:
       application: ${spring.application.name}
