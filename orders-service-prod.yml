@@ -1,13 +1,9 @@
 spring:
   # Используем переменные окружения для указания логинов, паролей и урлов
-  r2dbc:
+  datasource:
     username: ${DB_USER}
     password: ${DB_PASSWORD}
     url: ${DB_URL}
-  flyway:
-    user: ${spring.r2dbc.username}
-    password: ${spring.r2dbc.password}
-    url: ${FLYWAY_DB_URL}
   kafka:
     bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
     consumer:
@@ -16,7 +12,8 @@ spring:
 
 external:
   discovery-service-url: ${DISCOVERY_SERVICE_URL}
-  # Увеличиваем таймаут, который будет использоваться при связи с Menu Service
-  default-timeout: 5s
   zipkin-endpoint: ${ZIPKIN_URL}
   loki-url: ${LOKI_URL}
+  menu:
+    rest-client:
+      read-timeout: 2s

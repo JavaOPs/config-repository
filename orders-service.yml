@@ -1,32 +1,28 @@
 server:
   port: 9092
   shutdown: graceful
-  netty:
-    # время ожидания установки TCP соединения с сервером
-    connection-timeout: 3s
-    # время ожидания до закрытия TCP соединения, по которому не передаются данные
-    idle-timeout: 20s
+  tomcat:
+    connection-timeout: 2s
+    keep-alive-timeout: 20s
 
 spring:
+  main:
+    keep-alive: true
+  threads:
+    virtual:
+      enabled: true
   application:
     name: orders-service
   lifecycle:
     timeout-per-shutdown-phase: 30s
-  r2dbc:
+  datasource:
     username: user
     password: password
-    url: r2dbc:postgresql://localhost:15432/orders_service_db
-    pool:
-      # максимальное время ожидания получения соединения с базой
-      max-create-connection-time: 2s
-      # изначальный размер пула соединений
-      initial-size: 6
-      # максимальный размер пула соединений
-      max-size: 12
-  flyway:
-    user: ${spring.r2dbc.username}
-    password: ${spring.r2dbc.password}
     url: jdbc:postgresql://localhost:15432/orders_service_db
+    hikari:
+      connection-timeout: 2000
+      maximum-pool-size: 12
+      minimum-idle: 6
   kafka:
     bootstrap-servers: localhost:9097
     consumer:
@@ -58,12 +54,6 @@ kafkaprops:
 
 external:
   discovery-service-url: http://localhost:8761/eureka/
-  # url для связи с Menu Service
-  menu-service-url: "http://menu-service"
-  # путь эндпоинта для получения информации о доступности и ценах блюд
-  menu-info-path: "/v1/menu-items/menu-info"
-  # таймаут, который будет использоваться при связи с Menu Service, чтобы не ожидать ответа вечно
-  default-timeout: 2s
   # время ожидания перед тем, как совершить повторную попытку получить данные из Menu Service
   retry-backoff: 100ms
   # количество повторных попыток связи с Menu Service
@@ -73,6 +63,31 @@ external:
   retry-jitter: 0.75
   zipkin-endpoint: http://localhost:9411/api/v2/spans
   loki-url: http://localhost:3100/loki/api/v1/push
+  menu:
+    rest-client:
+      base-url: "http://menu-service"
+      read-timeout: 2s
+      connection-request-timeout: 5s
+      max-connections-per-route: 200
+      max-connections-total: 200
+      inactivity-validation-period: 2s
+    menu-info-path: "/v1/menu-items/menu-info"
+
+resilience4j:
+  retry:
+    configs:
+      default:
+        max-attempts: ${external.retry-count} # Максимальное количество попыток выполнения операции
+        wait-duration: ${external.retry-backoff} # Продолжительность ожидания между попытками.
+        enable-exponential-backoff: true # Включаем экспоненциальное увеличения времени ожидания между попытками.
+        exponential-backoff-multiplier: 2 # Множитель экспоненциального увеличения времени ожидания.
+        enable-randomized-wait: true #  Включаем случайную задержку между попытками.
+        randomized-wait-factor: ${external.retry-jitter} # Это означает, что фактическое время ожидания будет варьироваться на retry-jitter% от исходного значения.
+        retry-exceptions: # Список исключений, при возникновении которых будут выполнены повторные попытки.
+          - ru.javaops.cloudjava.ordersservice.exception.OrderServiceException
+    instances:
+      menuBackend:
+        base-config: default
 
 management:
   endpoints:

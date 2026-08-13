@@ -1,11 +1,16 @@
 server:
   port: 9094
   shutdown: graceful
-  netty:
-    connection-timeout: 3s
-    idle-timeout: 20s
+  tomcat:
+    connection-timeout: 2s
+    keep-alive-timeout: 20s
 
 spring:
+  main:
+    keep-alive: true
+  threads:
+    virtual:
+      enabled: true
   application:
     name: menu-aggregate-service
   lifecycle:
@@ -24,17 +29,30 @@ eureka:
 
 external:
   discovery-service-url: http://localhost:8761/eureka/
-  menu-service-url: "http://menu-service"
-  review-service-url: "http://review-service"
-  menu-item-path: "/v1/menu-items"
-  menu-reviews-path: "/v1/reviews/menu-item"
-  menu-ratings-path: "/v1/reviews/ratings"
-  default-timeout: 2s
   retry-backoff: 100ms
   retry-count: 5
   retry-jitter: 0.75
   zipkin-endpoint: http://localhost:9411/api/v2/spans
   loki-url: http://localhost:3100/loki/api/v1/push
+  menu:
+    rest-client:
+      base-url: "http://menu-service"
+      read-timeout: 2s
+      connection-request-timeout: 5s
+      max-connections-per-route: 200
+      max-connections-total: 200
+      inactivity-validation-period: 2s
+    menu-item-path: "/v1/menu-items"
+  review:
+    rest-client:
+      base-url: "http://review-service"
+      read-timeout: 2s
+      connection-request-timeout: 5s
+      max-connections-per-route: 200
+      max-connections-total: 200
+      inactivity-validation-period: 2s
+    menu-reviews-path: "/v1/reviews/menu-item"
+    menu-ratings-path: "/v1/reviews/ratings"
 
 management:
   endpoints:
