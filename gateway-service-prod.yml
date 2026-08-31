@@ -5,3 +5,33 @@ external:
   keycloak-url: ${KEYCLOAK_URL}
   jwk-set-url: ${JWK_SET_URL}
   loki-url: ${LOKI_URL}
+
+spring:
+  cloud:
+    gateway:
+      server:
+        webflux:
+          httpclient:
+            connect-timeout: 5000
+            response-timeout: 10s  # Увеличиваем таймаут HTTP-клиента до 10 секунд
+          default-filters:
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter:
+                  replenishRate: 3000 # для проведения НТ
+                  burstCapacity: 3500 # для проведения НТ
+
+resilience4j:
+  timelimiter:
+    configs:
+      default:
+        timeout-duration: 10s      # Увеличиваем таймаут предохранителя до 10 секунд
+
+management:
+  tracing:
+    sampling:
+      probability: 0.01
+
+logging:
+  level:
+    root: ERROR
